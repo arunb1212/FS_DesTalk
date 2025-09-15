@@ -1,0 +1,41 @@
++---------------------+
+|                     |
+|        users        |
+|                     |
+|  PK | id            |
+|     | username      |
+|     | email         |
+|     | password_hash |
+|     | home_location |
+|     | school_location|
+|     | created_at    |
+|                     |
++----------|----------+
+           | (1)
+           | (1 user has many routes)
+           |
++----------|----------+       +-----------------------+
+|                     |       |                       |
+|        routes       |       |     chat_threads      |
+|                     |       |                       |
+|  PK | id            |       |  PK | id              |
+| FK | user_id        |-------+ FK | user1_id         |
+|     | start_point   |       | FK | user2_id         |
+|     | end_point     |       |                       |
+|     | path          |       +-----------------------+
+|     | departure_time|               | (1)
+|     | is_active     |               | (1 thread has many messages)
+|     | created_at    |               |
++---------------------+       +-------|-----------------------+
+                                      |
+                              +-------|-----------------------+
+                              |                               |
+                              |        chat_messages          |
+                              |                               |
+                              |  PK | id                      |
+                              | FK | thread_id                |
+                              | FK | sender_id                |
+                              |     | message                 |
+                              |     | timestamp               |
+                              |                               |
+                              +-------------------------------+

@@ -1,0 +1,35 @@
++-----------------------+
+|                       |
+|      Frontend         |
+|  (React Application)  |
+|                       |
+|  - Map UI (Leaflet)   |
+|  - Chat Interface     |
+|  - Socket.io Client   |
+|                       |
++----------|------------+
+           | (HTTP/REST API, WebSocket Connection)
++----------|------------+
+|                       |
+|       Backend         |
+|    (Node.js / Express)|
+|                       |
+|  - REST API           |   +-----------------------+
+|  - WebSocket Server   |   |                       |
+|  - Matching Engine    |<->|        Redis          |
+|  - Auth (JWT)         |   |     (Caching &        |
+|                       |   |    Session Store)     |
++----------|------------+   +-----------------------+
+           | (Database Queries)
++----------|------------+
+|                       |
+|      Database         |
+|   (PostgreSQL +       |
+|      PostGIS)         |
+|                       |
+|  - Users Table        |
+|  - Routes Table       |
+|  - Chat Tables        |
+|  - Spatial Indexes    |
+|                       |
++-----------------------+
