@@ -1,151 +1,70 @@
-# 🚗 Student Commute Optimizer
+# Student Commute Optimizer 🚗🎒
 
-## 📌 Overview
+A full-stack carpooling and route-sharing application designed to help students find travel matches efficiently and safely. This project is an implementation ideation based on a problem statement from AIGSpace.
 
-The **Student Commute Optimizer** is a full-stack project designed to connect students who share similar routes and timings. It enables students to create trips, find overlapping commutes, and coordinate ride-sharing in a safe and anonymous way.
+## 📖 Overview
 
-This project demonstrates system design, architectural thinking, and trade-offs in building scalable web applications.
+Instead of each student commuting individually, this app matches students traveling along similar routes so they can share rides. The core principles are **Privacy**, **Simplicity**, and **Efficiency**.
 
----
+- **Frontend:** A simple map-based interface built with React where students enter locations, view matches, and chat anonymously.
+- **Backend:** A Node.js API that handles spatial matching algorithms, user authentication, and real-time chat functionality.
+- **Database:** PostgreSQL with PostGIS for performing efficient geographic queries to find nearby routes.
 
-## 🎯 Problem Statement
+## 🚀 Features
 
-Many students travel daily from similar origins to destinations but lack an easy way to coordinate.  
-This leads to:
+-   **Anonymous Matching:** Users are identified only by unique, non-duplicatable usernames.
+-   **Spatial Algorithm:** Efficient two-step algorithm to find students with overlapping commute paths.
+-   **In-App Chat:** Secure messaging system to coordinate logistics without sharing personal contact info.
+-   **Secure by Design:** JWT authentication, password hashing, and prepared statements to prevent SQL injection.
 
-- **Higher travel costs**
-- **Longer commute times**
-- **Missed opportunities for sustainable travel**
+## 🏗️ System Design
 
-**Goal:** Build a platform where students can post trips, find matches with overlapping routes, chat anonymously, and confirm rides.
+For a detailed breakdown of the architecture, data models, algorithms, and trade-offs, please see the full **[System Design Document](./docs/system-design.md)**.
 
----
+![High-Level Architecture](./docs/architecture.png)
+*Figure: High-Level 3-Tier Application Architecture*
 
-## 🏗 System Design
+## 🛠️ Tech Stack
 
-### High-Level Architecture
+| Layer               | Technology                          |
+| ------------------- | ----------------------------------- |
+| **Frontend**        | React, Leaflet/MapLibre, Socket.io-client |
+| **Backend**         | Node.js, Express.js, Socket.io      |
+| **Database**        | PostgreSQL (with PostGIS Extension) |
+| **Cache**           | Redis                               |
+| **Authentication**  | JWT (JSON Web Tokens)               |
+| **Spatial Queries** | PostGIS Functions                   |
 
-```plaintext
-[Frontend: React / React Native]
-        |
-        v
-[Backend API: Node.js / NestJS]
-   ├── Auth Service
-   ├── Trip Service
-   ├── Matching Engine
-   ├── Chat Service (WebSockets)
-   └── Notifications
-        |
-   -------------------------------
-   |             |              |
-[Postgres+PostGIS]   [Redis]   [Routing Engine (OSRM/Mapbox)]
-       |                |                |
-   [Trips/Users/     [Cache +        [Route & detour
-   Matches/Chats]     Pub/Sub]        calculations]
+## 📦 Installation & Setup
 
-   Key Components
-Frontend: React (Web) / React Native (Mobile)
-Backend: Node.js (NestJS/Express)
-Database: PostgreSQL with PostGIS (geospatial queries)
-Cache & Queue: Redis + BullMQ
-Routing Engine: OSRM (self-hosted) or Mapbox Directions API
-Real-time Chat: Socket.io (WebSockets)
-Storage: S3/MinIO for static assets
-🗄 Data Model
-Users
-id
-username (anonymous)
-email
-password_hash
-created_at
-Trips
-id
-user_id
-origin (point)
-destination (point)
-route (polyline)
-start_time
-seats
-Matches
-trip_a
-trip_b
-overlap_score
-detour_estimate
-status
-Messages
-id
-match_id
-sender_id
-body
-created_at
-🔑 Core Features (MVP)
-Student sign-up & login with anonymous display names
-Trip creation with origin, destination, and time
-Geospatial matching based on route overlap and time compatibility
-Anonymous in-app chat between matched students
-Accept/reject match suggestions
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/<your-username>/student-commute-optimizer.git
+    cd student-commute-optimizer
+    ```
 
-function find_matches(new_trip):
-    new_route = compute_route(new_trip.origin, new_trip.destination)
-    candidates = SELECT trips
-                 WHERE ST_DWithin(trips.route, new_route, 1000m)
-                   AND abs(trips.start_time - new_trip.start_time) < 30min
+2.  **Backend Setup:**
+    ```bash
+    cd backend
+    npm install
+    # Create a .env file based on .env.example and set your variables (DB_URL, JWT_SECRET, etc.)
+    npm run dev
+    ```
 
-    scored = []
-    for c in candidates:
-        inter_len = ST_Length(ST_Intersection(c.route, new_route))
-        pct_overlap = inter_len / ST_Length(new_route)
-        detour = estimate_detour(new_route, c.route)
-        score = 0.6 * pct_overlap - 0.2 * detour - 0.2 * time_diff
-        if pct_overlap > 0.2 and detour < 15min:
-            scored.append({trip: c, score: score})
+3.  **Frontend Setup:**
+    ```bash
+    cd ../frontend
+    npm install
+    npm start
+    ```
 
-    return top 5 by score
+4.  **Database Setup:** Ensure PostgreSQL and PostGIS are installed and running. Run the provided SQL scripts to create tables and spatial indexes.
 
+## 📄 License
 
-    ⚖️ Design Trade-offs
-Database
-Chosen: Postgres + PostGIS (powerful geospatial queries)
-Alternative: MongoDB with GeoJSON (simpler, but weaker for route overlap)
-Routing
-Chosen: OSRM (open-source, free)
-Alternative: Google Maps API (easier but costly at scale)
-Chat
-Chosen: Socket.io (real-time + anonymous)
-Alternative: Firebase Realtime DB (managed, but vendor lock-in)
-Hosting
-Chosen: Vercel (frontend), Render/Heroku (backend)
-Alternative: AWS/GCP (scalable, but more setup overhead)
-🔐 Privacy & Security Considerations
-Store anonymous display names, not real identities by default.
-Exact pickup points should be obfuscated (e.g., round coordinates to 50m).
-Secure communication with HTTPS + JWT.
-Chat messages stored with match_id, not personal identifiers.
-🚀 Tech Stack
-Frontend: React / React Native
-Backend: Node.js (NestJS/Express)
-Database: PostgreSQL + PostGIS
-Cache/Queue: Redis + BullMQ
-Routing: OSRM / Mapbox Directions
-Chat: Socket.io
-Deployment: Vercel + Render/Heroku
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🙏 Acknowledgments
 
-🛠 How to Run
-Backend
-
-cd backend
-npm install
-npm run dev
-
-Frontend
-cd frontend
-npm install
-npm start
-
-🌟 Future Enhancements
-Mobile-first PWA
-Push notifications for new matches
-ML-based smart ranking for better matches
-Payment integration (split fuel cost)
-Gamification (green commute badges)
+- Problem statement provided by **[AIGSpace](https://www.aigspace.com)**.
+- Icons provided by [FlatIcon](https://www.flaticon.com).
